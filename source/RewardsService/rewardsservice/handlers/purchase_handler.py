@@ -11,5 +11,15 @@ class PurchaseHandler(tornado.web.RequestHandler):
     def post(self):
         client = MongoClient("mongodb", 27017)
         db = client["Rewards"]
-        rewards = list(db.rewards.find({}, {"_id": 0}))
-        self.write(json.dumps(rewards))
+        email = self.get_body_argument('email')
+        total = self.get_body_argument('total')
+        self.write('email: %s total: %s' % (email, total))
+
+
+        #db.purchases.insert({})
+
+    @coroutine
+    def get(self):
+        email = self.get_query_argument('email')
+        total = self.get_query_argument('total')
+        self.write('email: %s total: %s' % (email, total))

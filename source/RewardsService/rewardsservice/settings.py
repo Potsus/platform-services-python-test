@@ -13,6 +13,8 @@ define("port", default=7050, help="run on the given port", type=int)
 
 settings = {
     'debug': True,
+    'autoreload': True,
+    'serve_traceback': True,
     'static_path': STATIC_ROOT,
     'template_loader': tornado.template.Loader(TEMPLATE_ROOT)
 }
