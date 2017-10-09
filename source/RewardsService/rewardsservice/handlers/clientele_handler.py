@@ -1,4 +1,4 @@
-import json
+from bson.json_util import dumps
 import tornado.web
 
 from pymongo import MongoClient
@@ -11,5 +11,5 @@ class ClienteleHandler(tornado.web.RequestHandler):
     def get(self):
         client = MongoClient("mongodb", 27017)
         db = client["Rewards"]
-        rewards = list(db.rewards.find({}, {"_id": 0}))
-        self.write(json.dumps(rewards))
+        clientele = list(db.customer.find({}, {"_id": 0}))
+        self.write(dumps(clientele))

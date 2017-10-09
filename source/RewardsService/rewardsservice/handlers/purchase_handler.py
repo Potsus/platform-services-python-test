@@ -13,19 +13,16 @@ class PurchaseHandler(tornado.web.RequestHandler):
         email = self.get_body_argument('email')
         total = self.get_body_argument('total')
 
-        self.write('email: %s total: %s' % (email, total))
-
-
-        #db.purchases.insert({})
+        user = list(self.updateUser(email, total))
+        #self.write(json.dumps(user))
 
     @coroutine
     def get(self):
         email = self.get_query_argument('email')
         total = self.get_query_argument('total')
 
-
-
-        self.write('email: %s total: %s' % (email, total))
+        user = self.updateUser(email, total)
+        #self.write(json.dumps(user))
 
 
 
@@ -37,14 +34,15 @@ class PurchaseHandler(tornado.web.RequestHandler):
 
         #setup db connection
         self.client = MongoClient("mongodb", 27017)
-        self.db = client["Rewards"]
+        self.db = self.client["Rewards"]
 
         user = self.getUser(email)
         user['points'] += total
 
         user = self.calculateStats(user)
 
-        self.db.customer.update({'email': user['email']}, user, {upsert: True})
+        self.db.customer.update({'email': user['email']}, user, True)
+        return user
 
 
     def getUser(self, email):
@@ -80,16 +78,16 @@ class PurchaseHandler(tornado.web.RequestHandler):
     def calculateStats(self, user):
 
         nextTier =  self.getNextTier(user)
-        currentTier =  self.getCurrentTier(user)
-
-        user['nextTier']         = nextTier['tier']                   
-        user['nextTierName']     = nextTier['rewardName']             
-
+        currentTier =  self.getCurrentTier(user)           
 
         user['tier']       = currentTier['tier']      
         user['rewardName'] = currentTier['rewardName']
 
-        user['nextTierProgress']   = (nextTier['points'] - user['points'])/(nextTier['points']-currentTier['points']) 
+        user['nextTier']         = nextTier['tier']                   
+        user['nextTierName']     = nextTier['rewardName']  
+
+        progress = float(nextTier['points'] - user['points'])/(nextTier['points']-currentTier['points'])
+        user['nextTierProgress']   =  round((1-progress), 2)
 
         return user
 
