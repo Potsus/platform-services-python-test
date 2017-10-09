@@ -39,14 +39,22 @@ class PurchaseHandler(tornado.web.RequestHandler):
         self.client = MongoClient("mongodb", 27017)
         self.db = client["Rewards"]
 
-        user =  self.db.customer.find_one({'email': email})
-        if user != None:
-            user['points'] += total
+        user = self.getUser(email)
+        user['points'] += total
 
         user = self.calculateStats(user)
 
         self.db.customer.update({'email': user['email']}, user, {upsert: True})
 
+
+    def getUser(self, email):
+        user =  self.db.customer.find_one({'email': email})
+        if user == None:
+            user = {
+                'email' : email,
+                'points' : 0
+            }
+        return user
 
 
     def getNextTier(self, user):
