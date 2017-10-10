@@ -3,7 +3,7 @@ import requests
 
 from django.template.response import TemplateResponse
 from django.views.generic.base import TemplateView
-from .forms import PurchaseForm
+from .forms import PurchaseForm, UserFilter
 
 
 class RewardsView(TemplateView):
@@ -17,11 +17,18 @@ class RewardsView(TemplateView):
 
         context['purchase_form'] = PurchaseForm
 
+        form = UserFilter(request.GET)
+        if form.is_valid():
+            response = requests.get("http://rewardsservice:7050/customer", data=request.GET)
+            context['clientele_data'] = list(response.json())
+        else:
+            response = requests.get("http://rewardsservice:7050/clientele")
+            context['clientele_data'] = response.json()
+
+        context['user_filter'] = form
+
         response = requests.get("http://rewardsservice:7050/rewards")
         context['rewards_data'] = response.json()
-
-        response = requests.get("http://rewardsservice:7050/clientele")
-        context['clientele_data'] = response.json()
 
         return TemplateResponse(
             request,
@@ -32,11 +39,12 @@ class RewardsView(TemplateView):
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
 
-        purchase_form = PurchaseForm(request.POST)
-        if purchase_form.is_valid():
+        form = PurchaseForm(request.POST)
+        if form.is_valid():
             r = requests.post("http://rewardsservice:7050/purchase", data=request.POST)
 
-        context['purchase_form'] = purchase_form
+        context['purchase_form'] = form
+        context['user_filter']   = UserFilter
 
 
         response = requests.get("http://rewardsservice:7050/rewards")
