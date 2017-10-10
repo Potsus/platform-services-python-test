@@ -9,10 +9,10 @@ class CustomerHandler(tornado.web.RequestHandler):
 
     @coroutine
     def get(self):
-        email = self.get_body_argument('email')
+        email = self.get_query_argument('email')
 
-        client = MongoClient("mongodb", 27017)
-        db = client["Rewards"]
-        
+        self.client = MongoClient("mongodb", 27017)
+        self.db = self.client["Rewards"]
+
         user =  self.db.customer.find_one({'email': email})
-        self.write(dumps(rewards))
+        self.write(dumps(user))
