@@ -66,7 +66,8 @@ class PurchaseHandler(tornado.web.RequestHandler):
         return nextTier
 
     def getCurrentTier(self, user):
-        currentTier =  self.db.rewards.find_one({'points': {'$lt': user['points']}})
+        currentTier =  list(self.db.rewards.find({'points': {'$lt': user['points']}}).sort('points', -1))
+        currentTier = currentTier[0] if len(currentTier) > 0 else None
         if currentTier == None:
             currentTier = {
                 'tier' : None,
