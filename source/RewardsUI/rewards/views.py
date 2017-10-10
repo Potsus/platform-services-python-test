@@ -19,9 +19,8 @@ class RewardsView(TemplateView):
 
         form = UserFilter(request.GET)
         if form.is_valid():
-            response = requests.get("http://rewardsservice:7050/customer", data=request.GET)
-            print(response.content)
-            context['clientele_data'] = response.json()
+            response = requests.get("http://rewardsservice:7050/customer", params=request.GET)
+            context['clientele_data'] = [response.json()]
         else:
             response = requests.get("http://rewardsservice:7050/clientele")
             context['clientele_data'] = response.json()
